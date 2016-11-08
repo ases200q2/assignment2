@@ -45,8 +45,8 @@ class TwoLayerNet(object):
     # weights and biases using the keys 'W1' and 'b1' and second layer weights #
     # and biases using the keys 'W2' and 'b2'.                                 #
     ############################################################################
-    b1=np.zeros(hidden_dim)
-    b2=np.zeros(num_classes)
+    b1=np.zeros((1,hidden_dim))
+    b2=np.zeros((1,num_classes))
     W1= np.random.randn(input_dim,hidden_dim)*weight_scale
     W2= np.random.randn(hidden_dim,num_classes)*weight_scale
     self.params['b1']=b1
@@ -94,7 +94,7 @@ class TwoLayerNet(object):
     X_row=np.reshape(X,(N,D))
     
     #First Layer
-    out, cache1 = affine_forward(X_row, W1, b1)
+    out, cache1 = affine_forward(X, W1, b1)
     hidden_layer,cache_relu =relu_forward(out)
     
     #Second Layer
@@ -137,7 +137,8 @@ class TwoLayerNet(object):
     grads['b1']=db1
     grads['W1']=dW1
     grads['b2']=db2
-    grads['W1']=dW2
+    grads['W2']=dW2
+    
 
     ############################################################################
     #                             END OF YOUR CODE                             #
@@ -204,7 +205,23 @@ class FullyConnectedNet(object):
     # beta2, etc. Scale parameters should be initialized to one and shift      #
     # parameters should be initialized to zero.                                #
     ############################################################################
-    pass
+    for i in range(self.num_layers):
+        if(i+1!=self.num_layers):
+            self.params['W'+str(i+1)]=np.random.randn(input_dim,hidden_dims[i])*weight_scale if i==0 else        np.random.randn(hidden_dims[i-1],hidden_dims[i])*weight_scale 
+            
+            self.params['b'+str(i+1)]=np.zeros((1,hidden_dims[i]))
+            
+            if self.use_batchnorm:
+                self.params['beta'+str(i+1)]=0.0
+                self.params['gamma'+str(i+1)]=1.0
+        else:
+            self.params['W'+str(i+1)]=np.random.randn(hidden_dims[i-1],num_classes)*weight_scale
+            self.params['b'+str(i+1)]=np.zeros((1,num_classes))
+     
+
+                
+            
+        
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -262,7 +279,19 @@ class FullyConnectedNet(object):
     # self.bn_params[1] to the forward pass for the second batch normalization #
     # layer, etc.                                                              #
     ############################################################################
-    pass
+    layer=X.copy()
+    af_params={}
+    
+    for i in range(self.num_layers):
+        if(i+1!=self.num_layers):
+            af_params['out'+str(i)],af_params['cache'+str(i)] = affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
+            layer,cache_relu =relu_forward(af_params['out'+str(i)])
+        else:
+            scores,af_params['cache'+str(i)]=affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
+      
+  
+    
+    
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -285,7 +314,14 @@ class FullyConnectedNet(object):
     # automated tests, make sure that your L2 regularization includes a factor #
     # of 0.5 to simplify the expression for the gradient.                      #
     ############################################################################
-    pass
+    loss,dscores=softmax_loss(scores,y)
+    L2=[np.sum(self.params['W'+str(i+1)]*self.params['W'+str(i+1)]) for i in range(self.num_layers)]
+    loss+=0.5*self.reg*np.sum(L2)
+
+    
+    
+    
+    
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################

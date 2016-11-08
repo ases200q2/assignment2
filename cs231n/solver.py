@@ -42,7 +42,7 @@ class Solver(object):
                   lr_decay=0.95,
                   num_epochs=10, batch_size=100,
                   print_every=100)
-  solver.train()
+  solver.()
 
 
   A Solver works on a model object that must conform to the following API:
