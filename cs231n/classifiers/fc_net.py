@@ -284,10 +284,11 @@ class FullyConnectedNet(object):
     
     for i in range(self.num_layers):
         if(i+1!=self.num_layers):
-            af_params['out'+str(i)],af_params['cache'+str(i)] = affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
-            layer,cache_relu =relu_forward(af_params['out'+str(i)])
+            af_params['out'+str(i+1)],af_params['cache'+str(i+1)] = affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
+            
+            layer,af_params['cache_relu'+str(i+1)] =relu_forward(af_params['out'+str(i+1)])
         else:
-            scores,af_params['cache'+str(i)]=affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
+            scores,af_params['cache'+str(i+1)]=affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
       
   
     
@@ -317,9 +318,22 @@ class FullyConnectedNet(object):
     loss,dscores=softmax_loss(scores,y)
     L2=[np.sum(self.params['W'+str(i+1)]*self.params['W'+str(i+1)]) for i in range(self.num_layers)]
     loss+=0.5*self.reg*np.sum(L2)
-
     
     
+  
+    for i in range(self.num_layers-1,-1,-1):
+        if(i+1==self.num_layers):
+            dlayer,grads['W'+str(i+1)],grads['b'+str(i+1)]=affine_backward(dscores, af_params['cache'+str(i)])
+        else:
+            dlayer,grads['W'+str(i+1)],grads['b'+str(i+1)]=affine_backward(dlayer, af_params['cache'+str(i)])
+        
+        dlayer=relu_backward(dlayer, af_params['cache_relu'+str(i)])
+            
+            
+    for i in range(self.num_layers):
+        grads['b'+str(i+1)]+=self.reg*self.params['b'+str(i+1)]
+        grads['W'+str(i+1)]+=self.reg*self.params['W'+str(i+1)]
+        
     
     
     ############################################################################
