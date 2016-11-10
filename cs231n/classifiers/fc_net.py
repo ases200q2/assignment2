@@ -116,7 +116,7 @@ class TwoLayerNet(object):
     # TODO: Implement the backward pass for the two-layer net. Store the loss  #
     # in the loss variable and gradients in the grads dictionary. Compute data #
     # loss using softmax, and make sure that grads[k] holds the gradients for  #
-    # self.params[k]. Don't forget to add L2 regularization!                   #
+    # self.params[k]. Don't forget to add L2 regularization!                   # vby6767660
     #                                                                          #
     # NOTE: To ensure that your implementation matches ours and you pass the   #
     # automated tests, make sure that your L2 regularization includes a factor #
@@ -323,11 +323,12 @@ class FullyConnectedNet(object):
   
     for i in range(self.num_layers-1,-1,-1):
         if(i+1==self.num_layers):
-            dlayer,grads['W'+str(i+1)],grads['b'+str(i+1)]=affine_backward(dscores, af_params['cache'+str(i)])
+            dlayer,grads['W'+str(i+1)],grads['b'+str(i+1)]=affine_backward(dscores, af_params['cache'+str(i+1)])
         else:
-            dlayer,grads['W'+str(i+1)],grads['b'+str(i+1)]=affine_backward(dlayer, af_params['cache'+str(i)])
+            dlayer,grads['W'+str(i+1)],grads['b'+str(i+1)]=affine_backward(dlayer, af_params['cache'+str(i+1)])
         
-        dlayer=relu_backward(dlayer, af_params['cache_relu'+str(i)])
+        if(i!=0):
+            dlayer=relu_backward(dlayer, af_params['cache_relu'+str(i)])
             
             
     for i in range(self.num_layers):
