@@ -91,7 +91,7 @@ class TwoLayerNet(object):
     b2=self.params['b2']
     W1=self.params['W1']
     W2=self.params['W2']
-    X_row=np.reshape(X,(N,D))
+
     
     #First Layer
     out, cache1 = affine_forward(X, W1, b1)
@@ -281,12 +281,13 @@ class FullyConnectedNet(object):
     ############################################################################
     layer=X.copy()
     af_params={}
+    out=None
     
     for i in range(self.num_layers):
         if(i+1!=self.num_layers):
-            af_params['out'+str(i+1)],af_params['cache'+str(i+1)] = affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
+            out,af_params['cache'+str(i+1)] = affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
             
-            layer,af_params['cache_relu'+str(i+1)] =relu_forward(af_params['out'+str(i+1)])
+            layer,af_params['cache_relu'+str(i+1)] =relu_forward(out)
         else:
             scores,af_params['cache'+str(i+1)]=affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
       
@@ -332,7 +333,6 @@ class FullyConnectedNet(object):
             
             
     for i in range(self.num_layers):
-        grads['b'+str(i+1)]+=self.reg*self.params['b'+str(i+1)]
         grads['W'+str(i+1)]+=self.reg*self.params['W'+str(i+1)]
         
     
