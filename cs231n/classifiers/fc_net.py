@@ -288,6 +288,13 @@ class FullyConnectedNet(object):
             out,af_params['cache'+str(i+1)] = affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
             
             layer,af_params['cache_relu'+str(i+1)] =relu_forward(out)
+            
+            if self.dropout_param['mode'] is 'train' and self.use_dropout : 
+                layer,af_params['cache_drop'+str(i+1)] = dropout_forward(layer,self.dropout_param)
+                #print self.dropout_param
+                    
+            
+            
         else:
             scores,af_params['cache'+str(i+1)]=affine_forward(layer,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
       
@@ -330,6 +337,10 @@ class FullyConnectedNet(object):
         
         if(i!=0):
             dlayer=relu_backward(dlayer, af_params['cache_relu'+str(i)])
+            
+            if  self.dropout_param['mode'] is 'train' and self.use_dropout:
+                dlayer= dropout_backward(dlayer,af_params['cache_drop'+str(i)])
+            
             
             
     for i in range(self.num_layers):

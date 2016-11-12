@@ -184,7 +184,14 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     # the momentum variable to update the running mean and running variance,    #
     # storing your result in the running_mean and running_var variables.        #
     #############################################################################
-    pass
+    
+    sample_mean=np.mean(x, axis = 0)
+    sample_var=np.std(x, axis = 0)**2
+    out= ((x-sample_mean)/np.sqrt(sample_var+eps))*gamma+beta
+    
+    running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+    running_var = momentum * running_var + (1 - momentum) * sample_var
+    
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -195,7 +202,8 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     # and shift the normalized data using gamma and beta. Store the result in   #
     # the out variable.                                                         #
     #############################################################################
-    pass
+    out=( (x-running_mean)/np.sqrt(running_var+eps) )*gamma+beta                                                              
+
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -300,7 +308,10 @@ def dropout_forward(x, dropout_param):
     # TODO: Implement the training phase forward pass for inverted dropout.   #
     # Store the dropout mask in the mask variable.                            #
     ###########################################################################
-    pass
+    mask = (np.random.rand(*x.shape) < p)/p
+    out =x* mask
+   
+    
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
@@ -308,7 +319,7 @@ def dropout_forward(x, dropout_param):
     ###########################################################################
     # TODO: Implement the test phase forward pass for inverted dropout.       #
     ###########################################################################
-    pass
+    out=x*p
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
@@ -335,7 +346,7 @@ def dropout_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the training phase backward pass for inverted dropout.  #
     ###########################################################################
-    pass
+    dx=dout*mask
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
@@ -372,7 +383,34 @@ def conv_forward_naive(x, w, b, conv_param):
   # TODO: Implement the convolutional forward pass.                           #
   # Hint: you can use the function np.pad for padding.                        #
   #############################################################################
-  pass
+  N, C, H, W =x.shape
+  F, CC, HH, WW=w.shape
+ 
+ 
+  pad= conv_param['pad']
+  stride=conv_param['stride']
+                  
+  #output dimension                
+  H_ = 1 + (H + 2 * pad - HH) / stride
+  W_ = 1 + (W + 2 * pad - WW) / stride
+                  
+  out=np.zeros((N, F, H_, W_))
+                  
+   
+  #padding                 
+  npad = ((0,0),(0,0), (pad,pad), (pad,pad))
+  x_pad = np.pad(x, pad_width=npad, mode='constant', constant_values=0)
+      
+  
+  for i in range(N):
+      for f in range(F):
+          for h in range(H_):
+               for k in range(W_):        
+                   out[i,f,h,k] = np.sum(x_pad[i,:,(h*stride):HH+(k*stride),(k*stride):WW+(k*stride)]* W[f]) + b[f]
+      
+                  
+                                                  
+                  
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
